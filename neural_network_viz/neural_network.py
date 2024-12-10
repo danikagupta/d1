@@ -12,6 +12,17 @@ class NeuralNetwork:
         self.layer1 = None
         self.output = None
         self.error = None
+        self.loss = None
+        self.previous_weights1 = None
+        self.previous_weights2 = None
+        self.previous_bias1 = None
+        self.previous_bias2 = None
+        self.weight_changes = {
+            'weights1': None,
+            'weights2': None,
+            'bias1': None,
+            'bias2': None
+        }
         self.gradients = {
             'weights1': None,
             'weights2': None,
@@ -25,6 +36,21 @@ class NeuralNetwork:
     def sigmoid_derivative(self, x):
         return x * (1 - x)
 
+    def calculate_loss(self, y_true, y_pred):
+        return np.mean(np.square(y_true - y_pred))
+
+    def store_previous_parameters(self):
+        self.previous_weights1 = self.weights1.copy()
+        self.previous_weights2 = self.weights2.copy()
+        self.previous_bias1 = self.bias1.copy()
+        self.previous_bias2 = self.bias2.copy()
+
+    def calculate_parameter_changes(self):
+        self.weight_changes['weights1'] = self.weights1 - self.previous_weights1
+        self.weight_changes['weights2'] = self.weights2 - self.previous_weights2
+        self.weight_changes['bias1'] = self.bias1 - self.previous_bias1
+        self.weight_changes['bias2'] = self.bias2 - self.previous_bias2
+
     def forward(self, X):
         # Forward propagation
         self.layer1 = self.sigmoid(np.dot(X, self.weights1) + self.bias1)
@@ -32,10 +58,14 @@ class NeuralNetwork:
         return self.output
 
     def backward(self, X, y, learning_rate=0.1):
+        # Store previous parameters
+        self.store_previous_parameters()
+
+        # Calculate initial loss
+        initial_loss = self.calculate_loss(y, self.output)
+
         # Backward propagation
         self.error = y - self.output
-
-        # Calculate gradients
         d_output = self.error * self.sigmoid_derivative(self.output)
 
         self.gradients['weights2'] = np.dot(self.layer1.T, d_output)
@@ -51,4 +81,10 @@ class NeuralNetwork:
         self.bias1 += learning_rate * self.gradients['bias1']
         self.bias2 += learning_rate * self.gradients['bias2']
 
-        return self.error
+        # Calculate parameter changes
+        self.calculate_parameter_changes()
+
+        # Calculate final loss
+        final_loss = self.calculate_loss(y, self.forward(X))
+
+        return initial_loss, final_loss, self.error
