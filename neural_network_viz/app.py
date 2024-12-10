@@ -180,7 +180,7 @@ if st.session_state.training and X is not None and y is not None:
             st.write(f"Final Loss: {final_loss:.4f}")
 
         # Update visualization
-        draw_network(ax, st.session_state.nn, show_gradients=True)
+        draw_network(ax, st.session_state.nn)
         st.pyplot(fig)
         plt.close(fig)
 
