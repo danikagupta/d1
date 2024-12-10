@@ -13,6 +13,8 @@ class NeuralNetwork:
         self.output = None
         self.error = None
         self.loss = None
+
+        # For tracking parameter changes
         self.previous_weights1 = None
         self.previous_weights2 = None
         self.previous_bias1 = None
@@ -21,6 +23,7 @@ class NeuralNetwork:
         # For storing training history
         self.loss_history = []
 
+        # For tracking weight changes
         self.weight_changes = {
             'weights1': None,
             'weights2': None,
@@ -64,7 +67,6 @@ class NeuralNetwork:
         # Backward propagation
         self.error = y - self.output
         delta_output = self.error * self.sigmoid_derivative(self.output)
-
         delta_hidden = np.dot(delta_output, self.weights2.T) * self.sigmoid_derivative(self.layer1)
 
         # Update weights and biases

@@ -51,7 +51,7 @@ def create_loss_plot():
     # Plot only final loss for each epoch
     epochs = range(1, len(st.session_state.nn.loss_history) + 1)
     ax.plot(epochs, st.session_state.nn.loss_history,
-            'b-', label='Loss', linewidth=2)
+            'b-', label='Loss', linewidth=2.5)
 
     ax.set_xlabel('Epoch')
     ax.set_ylabel('Loss')
@@ -98,29 +98,19 @@ def draw_network(ax, nn):
         for j, hidden_p in enumerate(hidden_pos):
             weight = nn.weights1[i, j]
             ax.plot([input_p[0], hidden_p[0]], [input_p[1], hidden_p[1]],
-                   color='gray', linewidth=2)
+                   color='gray', linewidth=3)
             ax.text((input_p[0] + hidden_p[0])/2,
                    (input_p[1] + hidden_p[1])/2,
                    f'w: {weight:.2f}', fontsize=8)
-            if nn.weight_changes is not None and nn.weight_changes['weights1'] is not None:
-                ax.text((input_p[0] + hidden_p[0])/2,
-                       (input_p[1] + hidden_p[1])/2 - 0.4,
-                       f'Δw: {nn.weight_changes["weights1"][i, j]:.2f}',
-                       fontsize=8, color='blue')
 
     for i, hidden_p in enumerate(hidden_pos):
         for j, output_p in enumerate(output_pos):
             weight = nn.weights2[i, j]
             ax.plot([hidden_p[0], output_p[0]], [hidden_p[1], output_p[1]],
-                   color='gray', linewidth=2)
+                   color='gray', linewidth=3)
             ax.text((hidden_p[0] + output_p[0])/2,
                    (hidden_p[1] + output_p[1])/2,
                    f'w: {weight:.2f}', fontsize=8)
-            if nn.weight_changes is not None and nn.weight_changes['weights2'] is not None:
-                ax.text((hidden_p[0] + output_p[0])/2,
-                       (hidden_p[1] + output_p[1])/2 - 0.4,
-                       f'Δw: {nn.weight_changes["weights2"][i, j]:.2f}',
-                       fontsize=8, color='blue')
 
 # Sidebar for data input
 st.sidebar.header("Training Data Input")
@@ -180,7 +170,7 @@ if st.session_state.training and X is not None and y is not None:
             st.write(f"Final Loss: {final_loss:.4f}")
 
         # Update visualization
-        draw_network(ax, st.session_state.nn, show_gradients=True)
+        draw_network(ax, st.session_state.nn)
         st.pyplot(fig)
         plt.close(fig)
 
