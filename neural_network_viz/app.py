@@ -48,13 +48,10 @@ def create_loss_plot():
     """Create a plot showing loss over epochs"""
     fig, ax = plt.subplots(figsize=(10, 4))
 
-    # Plot initial and final loss for each epoch
-    epochs = range(1, len(st.session_state.nn.epoch_losses['initial']) + 1)
-
-    ax.plot(epochs, st.session_state.nn.epoch_losses['initial'],
-            'r--', label='Initial Loss', alpha=0.7)
-    ax.plot(epochs, st.session_state.nn.epoch_losses['final'],
-            'g-', label='Final Loss', alpha=0.7)
+    # Plot only final loss for each epoch
+    epochs = range(1, len(st.session_state.nn.loss_history) + 1)
+    ax.plot(epochs, st.session_state.nn.loss_history,
+            'b-', label='Loss', linewidth=2)
 
     ax.set_xlabel('Epoch')
     ax.set_ylabel('Loss')
@@ -64,7 +61,7 @@ def create_loss_plot():
 
     return fig
 
-def draw_network(ax, nn, show_gradients=False):
+def draw_network(ax, nn):
     ax.clear()
     ax.set_xlim(-0.5, 3.5)
     ax.set_ylim(-0.5, 3.5)
@@ -100,24 +97,11 @@ def draw_network(ax, nn, show_gradients=False):
     for i, input_p in enumerate(input_pos):
         for j, hidden_p in enumerate(hidden_pos):
             weight = nn.weights1[i, j]
-            color = 'gray'
-            if show_gradients and nn.gradients['weights1'] is not None:
-                gradient = nn.gradients['weights1'][i, j]
-                color = 'red' if gradient < 0 else 'green'
-                alpha = min(abs(gradient), 1.0)
-            else:
-                alpha = abs(weight) / max(abs(nn.weights1.max()), 1)
-
             ax.plot([input_p[0], hidden_p[0]], [input_p[1], hidden_p[1]],
-                   color=color, alpha=alpha)
+                   color='gray', linewidth=2)
             ax.text((input_p[0] + hidden_p[0])/2,
                    (input_p[1] + hidden_p[1])/2,
                    f'w: {weight:.2f}', fontsize=8)
-            if show_gradients and nn.gradients['weights1'] is not None:
-                ax.text((input_p[0] + hidden_p[0])/2,
-                       (input_p[1] + hidden_p[1])/2 - 0.2,
-                       f'∇: {nn.gradients["weights1"][i, j]:.2f}',
-                       fontsize=8, color='red')
             if nn.weight_changes is not None and nn.weight_changes['weights1'] is not None:
                 ax.text((input_p[0] + hidden_p[0])/2,
                        (input_p[1] + hidden_p[1])/2 - 0.4,
@@ -127,24 +111,11 @@ def draw_network(ax, nn, show_gradients=False):
     for i, hidden_p in enumerate(hidden_pos):
         for j, output_p in enumerate(output_pos):
             weight = nn.weights2[i, j]
-            color = 'gray'
-            if show_gradients and nn.gradients['weights2'] is not None:
-                gradient = nn.gradients['weights2'][i, j]
-                color = 'red' if gradient < 0 else 'green'
-                alpha = min(abs(gradient), 1.0)
-            else:
-                alpha = abs(weight) / max(abs(nn.weights2.max()), 1)
-
             ax.plot([hidden_p[0], output_p[0]], [hidden_p[1], output_p[1]],
-                   color=color, alpha=alpha)
+                   color='gray', linewidth=2)
             ax.text((hidden_p[0] + output_p[0])/2,
                    (hidden_p[1] + output_p[1])/2,
                    f'w: {weight:.2f}', fontsize=8)
-            if show_gradients and nn.gradients['weights2'] is not None:
-                ax.text((hidden_p[0] + output_p[0])/2,
-                       (hidden_p[1] + output_p[1])/2 - 0.2,
-                       f'∇: {nn.gradients["weights2"][i, j]:.2f}',
-                       fontsize=8, color='red')
             if nn.weight_changes is not None and nn.weight_changes['weights2'] is not None:
                 ax.text((hidden_p[0] + output_p[0])/2,
                        (hidden_p[1] + output_p[1])/2 - 0.4,

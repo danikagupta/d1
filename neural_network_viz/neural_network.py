@@ -20,15 +20,8 @@ class NeuralNetwork:
 
         # For storing training history
         self.loss_history = []
-        self.epoch_losses = {'initial': [], 'final': []}
 
         self.weight_changes = {
-            'weights1': None,
-            'weights2': None,
-            'bias1': None,
-            'bias2': None
-        }
-        self.gradients = {
             'weights1': None,
             'weights2': None,
             'bias1': None,
@@ -57,7 +50,6 @@ class NeuralNetwork:
         self.weight_changes['bias2'] = self.bias2 - self.previous_bias2
 
     def forward(self, X):
-        # Forward propagation
         self.layer1 = self.sigmoid(np.dot(X, self.weights1) + self.bias1)
         self.output = self.sigmoid(np.dot(self.layer1, self.weights2) + self.bias2)
         return self.output
@@ -68,31 +60,24 @@ class NeuralNetwork:
 
         # Calculate initial loss
         initial_loss = self.calculate_loss(y, self.output)
-        self.epoch_losses['initial'].append(initial_loss)
 
         # Backward propagation
         self.error = y - self.output
-        d_output = self.error * self.sigmoid_derivative(self.output)
+        delta_output = self.error * self.sigmoid_derivative(self.output)
 
-        self.gradients['weights2'] = np.dot(self.layer1.T, d_output)
-        self.gradients['bias2'] = np.sum(d_output, axis=0)
-
-        d_hidden = np.dot(d_output, self.weights2.T) * self.sigmoid_derivative(self.layer1)
-        self.gradients['weights1'] = np.dot(X.T, d_hidden)
-        self.gradients['bias1'] = np.sum(d_hidden, axis=0)
+        delta_hidden = np.dot(delta_output, self.weights2.T) * self.sigmoid_derivative(self.layer1)
 
         # Update weights and biases
-        self.weights1 += learning_rate * self.gradients['weights1']
-        self.weights2 += learning_rate * self.gradients['weights2']
-        self.bias1 += learning_rate * self.gradients['bias1']
-        self.bias2 += learning_rate * self.gradients['bias2']
+        self.weights2 += learning_rate * np.dot(self.layer1.T, delta_output)
+        self.weights1 += learning_rate * np.dot(X.T, delta_hidden)
+        self.bias2 += learning_rate * np.sum(delta_output, axis=0)
+        self.bias1 += learning_rate * np.sum(delta_hidden, axis=0)
 
         # Calculate parameter changes
         self.calculate_parameter_changes()
 
         # Calculate final loss
         final_loss = self.calculate_loss(y, self.forward(X))
-        self.epoch_losses['final'].append(final_loss)
         self.loss_history.append(final_loss)
 
         return initial_loss, final_loss, self.error
@@ -100,4 +85,3 @@ class NeuralNetwork:
     def reset_history(self):
         """Reset all training history"""
         self.loss_history = []
-        self.epoch_losses = {'initial': [], 'final': []}
