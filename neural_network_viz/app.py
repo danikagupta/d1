@@ -44,6 +44,26 @@ def create_network_plot():
     ax.axis('off')
     return fig, ax
 
+def create_loss_plot():
+    """Create a plot showing loss over epochs"""
+    fig, ax = plt.subplots(figsize=(10, 4))
+
+    # Plot initial and final loss for each epoch
+    epochs = range(1, len(st.session_state.nn.epoch_losses['initial']) + 1)
+
+    ax.plot(epochs, st.session_state.nn.epoch_losses['initial'],
+            'r--', label='Initial Loss', alpha=0.7)
+    ax.plot(epochs, st.session_state.nn.epoch_losses['final'],
+            'g-', label='Final Loss', alpha=0.7)
+
+    ax.set_xlabel('Epoch')
+    ax.set_ylabel('Loss')
+    ax.set_title('Training Loss Over Time')
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+
+    return fig
+
 def draw_network(ax, nn, show_gradients=False):
     ax.clear()
     ax.set_xlim(-0.5, 3.5)
@@ -170,25 +190,34 @@ st.write(f"Current Epoch: {st.session_state.epoch}")
 
 # Training visualization
 if st.session_state.training and X is not None and y is not None:
-    fig, ax = create_network_plot()
+    # Network visualization
+    net_col, loss_col = st.columns([3, 2])
 
-    # Forward pass
-    output = st.session_state.nn.forward(X)
-    initial_loss, final_loss, error = st.session_state.nn.backward(X, y)
+    with net_col:
+        st.subheader("Network State")
+        fig, ax = create_network_plot()
 
-    # Display metrics
-    metrics_col1, metrics_col2 = st.columns(2)
-    with metrics_col1:
-        st.write(f"Initial Loss: {initial_loss:.4f}")
-    with metrics_col2:
-        st.write(f"Final Loss: {final_loss:.4f}")
+        # Forward pass
+        output = st.session_state.nn.forward(X)
+        initial_loss, final_loss, error = st.session_state.nn.backward(X, y)
 
-    # Update visualization
-    draw_network(ax, st.session_state.nn, show_gradients=True)
-    st.pyplot(fig)
+        # Display metrics
+        metrics_col1, metrics_col2 = st.columns(2)
+        with metrics_col1:
+            st.write(f"Initial Loss: {initial_loss:.4f}")
+        with metrics_col2:
+            st.write(f"Final Loss: {final_loss:.4f}")
+
+        # Update visualization
+        draw_network(ax, st.session_state.nn, show_gradients=True)
+        st.pyplot(fig)
+        plt.close(fig)
+
+    with loss_col:
+        st.subheader("Training Progress")
+        loss_fig = create_loss_plot()
+        st.pyplot(loss_fig)
+        plt.close(loss_fig)
 
     # Increment epoch
     st.session_state.epoch += 1
-
-    # Close figure to free memory
-    plt.close(fig)

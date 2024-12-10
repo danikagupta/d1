@@ -17,6 +17,11 @@ class NeuralNetwork:
         self.previous_weights2 = None
         self.previous_bias1 = None
         self.previous_bias2 = None
+
+        # For storing training history
+        self.loss_history = []
+        self.epoch_losses = {'initial': [], 'final': []}
+
         self.weight_changes = {
             'weights1': None,
             'weights2': None,
@@ -63,6 +68,7 @@ class NeuralNetwork:
 
         # Calculate initial loss
         initial_loss = self.calculate_loss(y, self.output)
+        self.epoch_losses['initial'].append(initial_loss)
 
         # Backward propagation
         self.error = y - self.output
@@ -86,5 +92,12 @@ class NeuralNetwork:
 
         # Calculate final loss
         final_loss = self.calculate_loss(y, self.forward(X))
+        self.epoch_losses['final'].append(final_loss)
+        self.loss_history.append(final_loss)
 
         return initial_loss, final_loss, self.error
+
+    def reset_history(self):
+        """Reset all training history"""
+        self.loss_history = []
+        self.epoch_losses = {'initial': [], 'final': []}
