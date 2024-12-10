@@ -182,3 +182,14 @@ if st.session_state.training and X is not None and y is not None:
 
     # Increment epoch
     st.session_state.epoch += 1
+
+# Initial visualization
+if 'nn' in st.session_state:
+    fig, ax = create_network_plot()
+    draw_network(ax, st.session_state.nn)
+    st.pyplot(fig)
+    plt.close(fig)
+
+    loss_fig = create_loss_plot()
+    st.pyplot(loss_fig)
+    plt.close(loss_fig)
