@@ -1,32 +1,26 @@
 import numpy as np
 
 class NeuralNetwork:
-    def __init__(self):
-        # Initialize weights and biases
-        self.weights1 = np.random.randn(2, 3)  # 2 input nodes to 3 hidden nodes
-        self.weights2 = np.random.randn(3, 1)  # 3 hidden nodes to 1 output node
-        self.bias1 = np.random.randn(3)  # bias for hidden layer
-        self.bias2 = np.random.randn(1)  # bias for output layer
+    def __init__(self, weights_init=None):
+        if weights_init is not None:
+            self.weights1 = np.full((2, 3), weights_init)
+            self.weights2 = np.full((3, 1), weights_init)
+            self.bias1 = np.full(3, weights_init)
+            self.bias2 = np.full(1, weights_init)
+        else:
+            self.weights1 = np.random.randn(2, 3)
+            self.weights2 = np.random.randn(3, 1)
+            self.bias1 = np.random.randn(3)
+            self.bias2 = np.random.randn(1)
 
-        # For storing intermediate values
-        self.layer1 = None
-        self.output = None
-        self.error = None
-        self.loss = None
-        self.previous_weights1 = None
-        self.previous_weights2 = None
-        self.previous_bias1 = None
-        self.previous_bias2 = None
-
-        # For storing training history
         self.loss_history = []
-
         self.weight_changes = {
-            'weights1': None,
-            'weights2': None,
-            'bias1': None,
-            'bias2': None
+            "weights1": None,
+            "weights2": None,
+            "bias1": None,
+            "bias2": None,
         }
+
 
     def sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
