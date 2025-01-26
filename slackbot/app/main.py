@@ -19,14 +19,15 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-# Initialize Slack bot with both tokens
+# Initialize Slack bot with tokens based on mode
 slack_bot_token = os.getenv("SLACK_BOT_TOKEN")
-slack_app_token = os.getenv("SLACK_APP_TOKEN")
+slack_app_token = os.getenv("SLACK_APP_TOKEN")  # Optional for socket mode
 
-if not slack_bot_token or not slack_app_token:
-    raise ValueError("Missing required Slack tokens in .env file")
+if not slack_bot_token:
+    raise ValueError("Missing required SLACK_BOT_TOKEN in .env file")
 
-slack_bot = SlackWordCountBot(slack_bot_token, slack_app_token)
+# Initialize bot with both tokens if running in socket mode, otherwise just bot token
+slack_bot = SlackWordCountBot(slack_bot_token, slack_app_token if os.getenv("USE_SOCKET_MODE") else None)
 
 @app.on_event("startup")
 async def startup_event():
