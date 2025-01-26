@@ -58,3 +58,10 @@ bash
    - Invite the bot to your channel: /invite @your-bot-name
    - Send any message
    - Bot will respond with word count
+  
+7. TO ENABLE DMs
+   Let's check your Slack App settings:
+   1. Go to api.slack.com/apps
+   2. Select "App Home"
+   3. Enable "Allow users to send Slash commands and messages from the messages tab"
+   Please verify this setting and try DMing again.
