@@ -61,10 +61,14 @@ class SlackWordCountBot:
             event = req.payload["event"]
             logger.info(f"[SlackBot] Event type: {event.get('type')}")
             
-            if event["type"] == "message" and "subtype" not in event:
+            # Handle both regular messages and DM messages
+            if (event["type"] == "message" or event["type"] == "message.im") and "subtype" not in event:
                 channel = event.get("channel")
                 user = event.get("user")
                 text = event.get("text")
+                
+                # Log the full event type for debugging
+                logger.info(f"[SlackBot] Processing event type: {event['type']} in channel type: {event.get('channel_type', 'unknown')}")
                 
                 # Get bot's own user ID if we haven't stored it yet
                 if not hasattr(self, 'bot_user_id'):
@@ -83,15 +87,39 @@ class SlackWordCountBot:
                 
                 if channel and user and text:
                     logger.info(f"[SlackBot] Processing message: '{text}' from user {user} in channel {channel}")
-                    # Run handle_message directly without create_task
+                    # Extract additional metadata
+                    event_ts = event.get("ts", "N/A")
+                    team_id = event.get("team", "N/A")
+                    channel_type = "DM" if event.get("channel_type") == "im" else "Channel"
+                    
+                    # Get user info for display name
+                    try:
+                        user_info = self.client.users_info(user=user)
+                        display_name = user_info["user"]["profile"].get("display_name") or user_info["user"]["name"]
+                    except Exception as e:
+                        logger.error(f"[SlackBot] Error fetching user info: {str(e)}")
+                        display_name = user
+                    
+                    # Format response with metadata
                     word_count = self.count_words(text)
-                    response = f"Your message contains {word_count} words."
+                    response = (
+                        f"*Message Analysis*\n"
+                        f"• Word Count: {word_count}\n"
+                        f"• Original Text: {text}\n"
+                        f"• Sent By: {display_name} (ID: {user})\n"
+                        f"• Timestamp: {event_ts}\n"
+                        f"• Channel Type: {channel_type}\n"
+                        f"• Channel/DM ID: {channel}\n"
+                        f"• Team ID: {team_id}"
+                    )
+                    
                     try:
                         self.client.chat_postMessage(
                             channel=channel,
-                            text=response
+                            text=response,
+                            mrkdwn=True  # Enable Slack markdown formatting
                         )
-                        logger.info(f"[SlackBot] Sent response: {response}")
+                        logger.info(f"[SlackBot] Sent response with metadata: {response}")
                     except Exception as e:
                         logger.error(f"[SlackBot] Error sending response: {str(e)}")
                 else:
