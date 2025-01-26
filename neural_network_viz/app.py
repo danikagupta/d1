@@ -68,6 +68,13 @@ def draw_network(ax, nn):
     ax.set_ylim(-0.5, 3.5)
     ax.axis('off')
 
+    # Add legend at the top right
+    legend_elements = [
+        plt.Line2D([0], [0], color='black', label='Old Value'),
+        plt.Line2D([0], [0], color='blue', label='New Value')
+    ]
+    ax.legend(handles=legend_elements, loc='upper right')
+
     # Node positions
     input_pos = [(0, 0.5), (0, 2.5)]
     hidden_pos = [(1.5, i) for i in [0.5, 1.5, 2.5]]
@@ -82,18 +89,23 @@ def draw_network(ax, nn):
 
     for i, pos in enumerate(hidden_pos):
         ax.add_patch(plt.Circle(pos, node_radius, color='lightgreen'))
-        ax.text(pos[0] - 0.1, pos[1] - 0.3, f'b: {nn.bias1[i]:.2f}', fontsize=12)
-        if st.session_state.show_weight_changes and nn.weight_changes is not None and nn.weight_changes['bias1'] is not None:
-            ax.text(pos[0] - 0.1, pos[1] - 0.5,
-                    f'Δb: {nn.weight_changes["bias1"][i]:.2f}',
-                    fontsize=12, color='blue')
+        if hasattr(nn, 'previous_bias1'):
+            ax.text(pos[0] - 0.1, pos[1] - 0.3, f'b: {nn.previous_bias1[i]:.2f}',
+                   fontsize=12, color='black')
+            ax.text(pos[0] - 0.1, pos[1] - 0.5, f'b: {nn.bias1[i]:.2f}',
+                   fontsize=12, color='blue')
+        else:
+            ax.text(pos[0] - 0.1, pos[1] - 0.3, f'b: {nn.bias1[i]:.2f}', fontsize=12)
 
     for pos in output_pos:
         ax.add_patch(plt.Circle(pos, node_radius, color='lightcoral'))
-        ax.text(pos[0] - 0.1, pos[1] - 0.3, f'b: {nn.bias2[0]:.2f}', fontsize=12)
-        if st.session_state.show_weight_changes and nn.weight_changes is not None and nn.weight_changes['bias2'] is not None:
-            ax.text(pos[0] - 0.1, pos[1] - 0.5,
-                    f'Δb: {nn.weight_changes["bias2"][0]:.2f}', fontsize=12, color='blue')
+        if hasattr(nn, 'previous_bias2'):
+            ax.text(pos[0] - 0.1, pos[1] - 0.3, f'b: {nn.previous_bias2[0]:.2f}',
+                   fontsize=12, color='black')
+            ax.text(pos[0] - 0.1, pos[1] - 0.5, f'b: {nn.bias2[0]:.2f}',
+                   fontsize=12, color='blue')
+        else:
+            ax.text(pos[0] - 0.1, pos[1] - 0.3, f'b: {nn.bias2[0]:.2f}', fontsize=12)
 
     # Function to calculate edge point
     def calculate_edge_point(p1, p2, radius):
@@ -112,14 +124,17 @@ def draw_network(ax, nn):
             weight = nn.weights1[i, j]
             ax.arrow(start[0], start[1], end[0]-start[0], end[1]-start[1],
                      color='gray', linewidth=2, head_width=0.05, head_length=0.1, length_includes_head=True)
-            ax.text((start[0] + end[0]) / 2,
-                    (start[1] + end[1]) / 2,
-                    f'w: {weight:.2f}', fontsize=12)
-            if st.session_state.show_weight_changes and nn.weight_changes is not None and nn.weight_changes['weights1'] is not None:
+            if hasattr(nn, 'previous_weights1'):
                 ax.text((start[0] + end[0]) / 2,
-                        (start[1] + end[1]) / 2 - 0.4,
-                        f'Δw: {nn.weight_changes["weights1"][i, j]:.2f}',
-                        fontsize=12, color='blue')
+                        (start[1] + end[1]) / 2,
+                        f'w: {nn.previous_weights1[i, j]:.2f}', fontsize=12, color='black')
+                ax.text((start[0] + end[0]) / 2,
+                        (start[1] + end[1]) / 2 - 0.2,
+                        f'w: {weight:.2f}', fontsize=12, color='blue')
+            else:
+                ax.text((start[0] + end[0]) / 2,
+                        (start[1] + end[1]) / 2,
+                        f'w: {weight:.2f}', fontsize=12)
 
     for i, hidden_p in enumerate(hidden_pos):
         for j, output_p in enumerate(output_pos):
@@ -128,14 +143,17 @@ def draw_network(ax, nn):
             weight = nn.weights2[i, j]
             ax.arrow(start[0], start[1], end[0]-start[0], end[1]-start[1],
                      color='gray', linewidth=2, head_width=0.05, head_length=0.1, length_includes_head=True)
-            ax.text((start[0] + end[0]) / 2,
-                    (start[1] + end[1]) / 2,
-                    f'w: {weight:.2f}', fontsize=12)
-            if st.session_state.show_weight_changes and nn.weight_changes is not None and nn.weight_changes['weights2'] is not None:
+            if hasattr(nn, 'previous_weights2'):
                 ax.text((start[0] + end[0]) / 2,
-                        (start[1] + end[1]) / 2 - 0.4,
-                        f'Δw: {nn.weight_changes["weights2"][i, j]:.2f}',
-                        fontsize=12, color='blue')
+                        (start[1] + end[1]) / 2,
+                        f'w: {nn.previous_weights2[i, j]:.2f}', fontsize=12, color='black')
+                ax.text((start[0] + end[0]) / 2,
+                        (start[1] + end[1]) / 2 - 0.2,
+                        f'w: {weight:.2f}', fontsize=12, color='blue')
+            else:
+                ax.text((start[0] + end[0]) / 2,
+                        (start[1] + end[1]) / 2,
+                        f'w: {weight:.2f}', fontsize=12)
 
 def display_results_table(X, y_actual, y_pred):
     import pandas as pd
