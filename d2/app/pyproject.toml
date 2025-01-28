@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "app"
+version = "0.1.0"
+description = "Slackbot for word counting and message analysis"
+authors = ["Devin AI <devin@tensorprof.ai>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = {extras = ["standard"], version = "^0.115.7"}
+slack-sdk = {extras = ["socket-mode"], version = "^3.34.0"}
+python-dotenv = "^1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
